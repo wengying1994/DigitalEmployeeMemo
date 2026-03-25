@@ -53,12 +53,10 @@ def create_celery_app() -> Celery:
             "check-pending-conflicts": {
                 "task": "app.tasks.reminder_tasks.check_pending_conflicts",
                 "schedule": crontab(minute="*/5"),  # Every 5 minutes
-                "description": "Check pending conflicts and generate reminders",
             },
             "process-overdue-memos": {
                 "task": "app.tasks.reminder_tasks.process_overdue_memos",
                 "schedule": crontab(minute="*/15"),  # Every 15 minutes
-                "description": "Process overdue memos and escalate",
             },
         },
     )

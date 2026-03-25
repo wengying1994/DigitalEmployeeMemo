@@ -3,7 +3,7 @@ Log model for operation audit trail.
 """
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import JSON, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
@@ -68,6 +68,7 @@ class Log(Base, TimestampMixin):
         comment="Resource ID"
     )
     details: Mapped[dict | None] = mapped_column(
+        JSON,
         nullable=True,
         comment="Additional details as JSON"
     )

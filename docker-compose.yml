@@ -97,7 +97,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: dem_celery_beat
-    command: celery -A app.core.celery_app beat --loglevel=info
+    working_dir: /tmp
+    command: celery -A app.core.celery_app beat --loglevel=info --schedule /tmp/celerybeat-schedule
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/digital_employee_memo
       DATABASE_URL_SYNC: postgresql://postgres:postgres@db:5432/digital_employee_memo
