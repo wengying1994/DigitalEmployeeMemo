@@ -1,61 +1,21 @@
 ---
 name: digital-employee-memo
-description: DigitalEmployeeMemo system - cross-department task management with conflict resolution workflow
+description: DigitalEmployeeMemo - simplified bidirectional message memo system
 ---
 
 # DigitalEmployeeMemo System Skill
 
 ## System Overview
 
-DigitalEmployeeMemo 是一个企业跨部门协作任务管理系统，主要功能包括：
-
-- **任务管理** - 领导创建任务/项目，分配牵头部门和预期交付物
-- **工作分配** - 牵头部门注册各部门的协作任务分配
-- **部门反馈** - 各部门提供反馈（同意/不同意/需要讨论）
-- **冲突上报** - 牵头部门上报协调冲突，系统自动生成领导备忘录
-- **领导备忘录** - 领导查看待处理/已解决的冲突报告并做出决策
-- **智能提醒** - 多阶段提醒机制，支持升级处理
+DigitalEmployeeMemo 是一个简化的双向留言备忘录系统，支持领导和员工互相发送消息。
 
 ## User Roles
 
 | 角色 | 英文 | 权限 |
 |------|------|------|
-| 领导 | leader | 创建任务、查看所有数据、解决冲突 |
-| 部门负责人 | dept_head | 分解任务、上报冲突 |
-| 部门成员 | member | 提交反馈、查看任务 |
-
-## Typical Workflow
-
-```
-1. 领导创建任务
-   POST /api/v1/tasks
-   → 任务ID: 1
-
-2. 牵头部门注册分配
-   POST /api/v1/assignments/tasks/1/assignments
-   → 分配ID: 1
-
-3. 参与部门提交反馈
-   POST /api/v1/feedbacks/assignments/1/feedback
-   → 反馈已提交
-
-4. 如有冲突，牵头部门上报
-   POST /api/v1/conflicts
-   → 冲突已创建，生成备忘录
-
-5. 领导查看待处理备忘录
-   GET /api/v1/memos/leader/pending
-
-6. 领导做出决策
-   POST /api/v1/conflicts/{id}/decision
-   → 冲突已解决
-```
-
-## API Base URL
-
-```
-http://localhost:8000/api/v1
-```
+| 领导 | leader | 可以给任何人发消息 |
+| 部门负责人 | dept_head | 只能给领导发消息 |
+| 部门成员 | member | 只能给领导发消息 |
 
 ## Authentication
 
@@ -65,18 +25,78 @@ X-User-ID: <用户ID>
 X-Dept-ID: <部门ID>
 ```
 
-## Key Endpoints
+## API Base URL
 
-| 功能 | 方法 | 路径 |
+```
+http://localhost:8000/api/v1
+```
+
+## API Endpoints
+
+| 方法 | 路径 | 描述 |
 |------|------|------|
-| 创建任务 | POST | /tasks |
-| 任务列表 | GET | /tasks |
-| 创建分配 | POST | /assignments/tasks/{task_id}/assignments |
-| 提交反馈 | POST | /feedbacks/assignments/{assignment_id}/feedback |
-| 上报冲突 | POST | /conflicts |
-| 冲突决策 | POST | /conflicts/{id}/decision |
-| 领导待处理备忘录 | GET | /memos/leader/pending |
-| 领导面板 | GET | /leader/dashboard |
+| POST | /messages | 发送留言 |
+| GET | /messages | 获取消息列表（支持 direction=sent/received） |
+| GET | /messages/{id} | 获取单条消息详情 |
+| PUT | /messages/{id}/read | 标记已读 |
+| DELETE | /messages/{id} | 删除消息（仅发送者可删除） |
+
+## Usage Examples
+
+### 发送消息
+
+领导发送给员工：
+```bash
+curl -X POST http://localhost:8000/api/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "X-User-ID: 1" \
+  -H "X-Dept-ID: 1" \
+  -d '{"title": "通知", "content": "请注意查收", "receiver_id": 2}'
+```
+
+员工发送给领导：
+```bash
+curl -X POST http://localhost:8000/api/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "X-User-ID: 2" \
+  -H "X-Dept-ID: 2" \
+  -d '{"title": "反馈", "content": "已完成任务", "receiver_id": 1}'
+```
+
+### 获取消息列表
+
+```bash
+# 获取所有消息
+curl -X GET http://localhost:8000/api/v1/messages \
+  -H "X-User-ID: 1" \
+  -H "X-Dept-ID: 1"
+
+# 仅获取发送的消息
+curl -X GET "http://localhost:8000/api/v1/messages?direction=sent" \
+  -H "X-User-ID: 1" \
+  -H "X-Dept-ID: 1"
+
+# 仅获取接收的消息
+curl -X GET "http://localhost:8000/api/v1/messages?direction=received" \
+  -H "X-User-ID: 1" \
+  -H "X-Dept-ID: 1"
+```
+
+### 标记已读
+
+```bash
+curl -X PUT http://localhost:8000/api/v1/messages/1/read \
+  -H "X-User-ID: 2" \
+  -H "X-Dept-ID: 2"
+```
+
+### 获取单条消息
+
+```bash
+curl -X GET http://localhost:8000/api/v1/messages/1 \
+  -H "X-User-ID: 1" \
+  -H "X-Dept-ID: 1"
+```
 
 ## Common Issues & Solutions
 
@@ -84,34 +104,37 @@ X-Dept-ID: <部门ID>
 
 **症状**: Pydantic 验证时出现 `MissingGreenlet: greenlet_spawn has not been called`
 
-**原因**: SQLAlchemy 异步对象在过期状态时被访问，触发了懒加载
+**原因**: SQLAlchemy 异步对象在过期状态时被访问
 
-**解决**:
-1. 在 flush() 后添加 `await db.refresh(obj)`
-2. 避免使用 `obj.relationship` 访问，改用 `obj.foreign_key_id` 直接访问
-3. 如果需要关联数据，使用显式查询 `await db.execute(select(Model).where(...))`
-
-### Timezone Error
-
-**症状**: `can't compare offset-naive and offset-aware datetimes`
-
-**解决**: 使用 `datetime.now(timezone.utc)` 替代 `datetime.utcnow()`，并确保 `today_start` 没有 timezone 信息
+**解决**: 在 flush() 后添加 `await db.refresh(obj)`
 
 ### Schema Validation Error
 
-**症状**: `Input should be a valid dictionary` 对于 list 类型字段
+**症状**: 类型验证失败
 
-**原因**: Pydantic schema 定义类型与实际数据不匹配
-
-**解决**: 确认 schema 中使用 `List[Dict]` 而非 `Dict` 用于列表类型
+**解决**: 确保请求体中的字段类型与 schema 匹配
 
 ## Database Models
 
-- **Task** - 任务
-- **Assignment** - 工作分配
-- **Feedback** - 部门反馈
-- **ConflictReport** - 冲突报告
-- **Memo** - 领导备忘录
-- **Reminder** - 提醒记录
-- **User** - 用户
-- **Department** - 部门
+- **User** - 用户（id, name, email, role, dept_id）
+- **Department** - 部门（id, name, description）
+- **Message** - 留言（id, sender_id, receiver_id, title, content, is_read, read_at）
+
+## Deployment
+
+```bash
+# 启动服务
+docker-compose up -d
+
+# 运行迁移
+docker-compose exec alembic sh -c "cd /app && alembic upgrade head"
+
+# 初始化种子数据
+docker-compose run --rm api python seed_data.py
+```
+
+## Health Check
+
+```bash
+curl http://localhost:8000/health
+```
