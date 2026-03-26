@@ -79,14 +79,9 @@ async def init_db() -> None:
     """
     from app.db.base import Base
     from app.models import (  # noqa: F401 - Import to register models
-        assignment,
-        collaborator,
-        conflict_report,
-        feedback,
-        memo,
-        reminder,
-        task,
-        user,
+        User,
+        Department,
+        Message,
     )
 
     async with engine.begin() as conn:

@@ -3,7 +3,6 @@ Celery application configuration.
 Sets up Celery with Redis as broker and result backend.
 """
 from celery import Celery
-from celery.schedules import crontab
 
 from app.config import settings
 
@@ -19,10 +18,6 @@ def create_celery_app() -> Celery:
         "digital_employee_memo",
         broker=settings.CELERY_BROKER_URL,
         backend=settings.CELERY_BACKEND_URL,
-        include=[
-            "app.tasks.reminder_tasks",
-            "app.tasks.notification_tasks",
-        ]
     )
 
     # Celery configuration
@@ -47,18 +42,6 @@ def create_celery_app() -> Celery:
         # Worker settings
         worker_prefetch_multiplier=1,
         worker_concurrency=4,
-
-        # Beat schedule for periodic tasks
-        beat_schedule={
-            "check-pending-conflicts": {
-                "task": "app.tasks.reminder_tasks.check_pending_conflicts",
-                "schedule": crontab(minute="*/5"),  # Every 5 minutes
-            },
-            "process-overdue-memos": {
-                "task": "app.tasks.reminder_tasks.process_overdue_memos",
-                "schedule": crontab(minute="*/15"),  # Every 15 minutes
-            },
-        },
     )
 
     return celery_app

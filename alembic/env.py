@@ -19,8 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app.config import settings
 from app.db.base import Base
 from app.models import (  # noqa: F401 - Import all models to register them
-    User, Department, Task, Assignment, Feedback,
-    ConflictReport, Memo, Collaborator, Reminder, Log
+    User, Department, Message
 )
 
 # this is the Alembic Config object

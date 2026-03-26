@@ -52,7 +52,6 @@ services:
       CELERY_BACKEND_URL: redis://redis:6379/0
       SECRET_KEY: your-secret-key-change-in-production
       DEBUG: "true"
-      NOTIFICATION_EMAIL_ENABLED: "false"
     ports:
       - "8000:8000"
     depends_on:
@@ -65,53 +64,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    networks:
-      - dem_network
-
-  # Celery Worker
-  celery_worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: dem_celery_worker
-    command: celery -A app.core.celery_app worker --loglevel=info
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/digital_employee_memo
-      DATABASE_URL_SYNC: postgresql://postgres:postgres@db:5432/digital_employee_memo
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_BACKEND_URL: redis://redis:6379/0
-      SECRET_KEY: your-secret-key-change-in-production
-      DEBUG: "true"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - dem_network
-
-  # Celery Beat (Scheduler)
-  celery_beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: dem_celery_beat
-    working_dir: /tmp
-    command: celery -A app.core.celery_app beat --loglevel=info --schedule /tmp/celerybeat-schedule
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/digital_employee_memo
-      DATABASE_URL_SYNC: postgresql://postgres:postgres@db:5432/digital_employee_memo
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_BACKEND_URL: redis://redis:6379/0
-      SECRET_KEY: your-secret-key-change-in-production
-      DEBUG: "true"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - dem_network
 

@@ -65,9 +65,8 @@ class User(Base, TimestampMixin):
 
     # Relationships
     department = relationship("Department", back_populates="users", foreign_keys=[dept_id])
-    created_tasks = relationship("Task", back_populates="creator", foreign_keys="Task.created_by")
-    created_memos = relationship("Memo", back_populates="leader")
-    reminders = relationship("Reminder", back_populates="target_user")
+    sent_messages = relationship("Message", back_populates="sender", foreign_keys="Message.sender_id")
+    received_messages = relationship("Message", back_populates="receiver", foreign_keys="Message.receiver_id")
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, name='{self.name}', role='{self.role}')>"

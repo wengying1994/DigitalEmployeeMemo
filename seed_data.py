@@ -42,13 +42,13 @@ async def seed_data():
 
         # Create users
         users = [
-            User(id=1, name="李XX", email="lizhong@company.com", role="leader", dept_id=1,
+            User(id=1, name="李领导", email="lizhong@company.com", role="leader", dept_id=1,
                  is_deleted=False),
-            User(id=2, name="吴XX", email="wuxx@company.com", role="dept_head", dept_id=2,
+            User(id=2, name="吴主任", email="wuxx@company.com", role="dept_head", dept_id=2,
                  is_deleted=False),
-            User(id=3, name="张ICNOC", email="zhang@company.com", role="member", dept_id=3,
+            User(id=3, name="张工", email="zhang@company.com", role="member", dept_id=3,
                  is_deleted=False),
-            User(id=4, name="刘ISOC", email="liu@company.com", role="member", dept_id=4,
+            User(id=4, name="刘工", email="liu@company.com", role="member", dept_id=4,
                  is_deleted=False),
         ]
 

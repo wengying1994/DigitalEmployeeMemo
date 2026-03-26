@@ -45,9 +45,6 @@ class Department(Base, TimestampMixin):
     # Relationships
     users = relationship("User", back_populates="department", foreign_keys="User.dept_id")
     leader = relationship("User", foreign_keys=[leader_id])
-    tasks_as_lead = relationship("Task", back_populates="lead_department", foreign_keys="Task.lead_dept_id")
-    assignments = relationship("Assignment", back_populates="department")
-    feedbacks = relationship("Feedback", back_populates="department")
 
     def __repr__(self) -> str:
         return f"<Department(id={self.id}, name='{self.name}')>"
