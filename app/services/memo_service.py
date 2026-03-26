@@ -1,7 +1,7 @@
 """
 Memo service for business logic related to leader memos.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 from sqlalchemy import and_, or_, select
@@ -278,8 +278,8 @@ class MemoService(LoggerMixin):
         if current_user.role != "leader":
             raise ForbiddenException()
 
-        now = datetime.utcnow()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
 
         # Count pending memos
         pending_memos_result = await self.db.execute(
