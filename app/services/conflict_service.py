@@ -143,10 +143,12 @@ class ConflictService(LoggerMixin):
         await self.db.flush()
         await self.db.refresh(memo)
 
-        # Link memo to conflict
-        conflict.memo = memo
+        # Link memo to conflict via memo_id (avoid lazy loading relationship)
+        conflict.memo_id = memo.id
 
         await self.db.flush()
+        # Refresh conflict to ensure all attributes are loaded before returning
+        await self.db.refresh(conflict)
 
         # Audit log
         audit_log.log(
@@ -347,11 +349,18 @@ class ConflictService(LoggerMixin):
         conflict.decision_maker_id = current_user.id
         conflict.status = ConflictStatus.RESOLVED
 
-        # Update related memo
-        if conflict.memo:
-            conflict.memo.status = MemoStatus.RESOLVED
+        # Update related memo via direct query (avoid lazy loading)
+        if conflict.memo_id:
+            memo_result = await self.db.execute(
+                select(Memo).where(Memo.id == conflict.memo_id)
+            )
+            memo = memo_result.scalar_one_or_none()
+            if memo:
+                memo.status = MemoStatus.RESOLVED
 
         await self.db.flush()
+        # Refresh conflict to ensure all attributes are loaded before returning
+        await self.db.refresh(conflict)
 
         # Audit log
         audit_log.log(

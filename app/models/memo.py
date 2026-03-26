@@ -99,7 +99,7 @@ class Memo(Base, TimestampMixin):
     # Relationships
     leader = relationship("User", back_populates="created_memos")
     related_task = relationship("Task", back_populates="memos")
-    related_conflict = relationship("ConflictReport", back_populates="memo", uselist=False)
+    related_conflict = relationship("ConflictReport", back_populates="memo", uselist=False, foreign_keys="ConflictReport.memo_id")
     collaborators = relationship("Collaborator", back_populates="memo", cascade="all, delete-orphan")
     reminders = relationship("Reminder", back_populates="memo", cascade="all, delete-orphan")
 

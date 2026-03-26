@@ -11,7 +11,7 @@ class ConflictBase(BaseModel):
     """Base conflict schema with common fields."""
     conflict_summary: str = Field(..., min_length=1, max_length=255, description="Brief summary")
     conflict_details: Optional[Dict[str, Any]] = Field(None, description="Detailed conflict info")
-    proposed_solutions: Optional[Dict[str, Any]] = Field(None, description="Proposed solutions")
+    proposed_solutions: Optional[List[Dict[str, Any]]] = Field(None, description="Proposed solutions as list of objects")
     urgency_level: str = Field(default="medium", description="Urgency: low, medium, high, critical")
     need_decision_by: Optional[datetime] = Field(None, description="Decision deadline")
 
@@ -25,7 +25,7 @@ class ConflictUpdate(BaseModel):
     """Schema for updating a conflict report."""
     conflict_summary: Optional[str] = Field(None, min_length=1, max_length=255)
     conflict_details: Optional[Dict[str, Any]] = None
-    proposed_solutions: Optional[Dict[str, Any]] = None
+    proposed_solutions: Optional[List[Dict[str, Any]]] = None
     urgency_level: Optional[str] = None
     need_decision_by: Optional[datetime] = None
     status: Optional[str] = None

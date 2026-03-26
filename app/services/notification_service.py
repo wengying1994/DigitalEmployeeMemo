@@ -102,7 +102,7 @@ class NotificationService(LoggerMixin):
             # Notify reporter
             send_in_app_notification_task.delay(
                 conflict.reporter_user_id,
-                conflict.memo_id if conflict.memo else None,
+                conflict.memo_id,
                 "conflict_resolved",
                 {"decision_content": decision_content}
             )
@@ -117,7 +117,7 @@ class NotificationService(LoggerMixin):
                 for user in lead_users:
                     send_in_app_notification_task.delay(
                         user.id,
-                        conflict.memo_id if conflict.memo else None,
+                        conflict.memo_id,
                         "conflict_resolved",
                         {
                             "decision_content": decision_content,

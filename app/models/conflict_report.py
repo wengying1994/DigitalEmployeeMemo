@@ -109,6 +109,12 @@ class ConflictReport(Base, TimestampMixin):
         nullable=True,
         comment="Decision maker user ID"
     )
+    memo_id: Mapped[int | None] = mapped_column(
+        ForeignKey("memos.id", ondelete="CASCADE"),
+        nullable=True,
+        unique=True,
+        comment="Related memo ID"
+    )
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
@@ -122,7 +128,7 @@ class ConflictReport(Base, TimestampMixin):
     reporter_user = relationship("User", foreign_keys=[reporter_user_id])
     reporter_department = relationship("Department", foreign_keys=[reporter_dept_id])
     decision_maker = relationship("User", foreign_keys=[decision_maker_id])
-    memo = relationship("Memo", back_populates="related_conflict", uselist=False)
+    memo = relationship("Memo", back_populates="related_conflict", uselist=False, foreign_keys=[memo_id])
 
     def __repr__(self) -> str:
         return f"<ConflictReport(id={self.id}, task_id={self.task_id}, status='{self.status}')>"
