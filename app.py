@@ -6,7 +6,7 @@ from openpyxl import load_workbook, Workbook
 
 app = Flask(__name__)
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_0")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
